@@ -1,5 +1,4 @@
 <script setup>
-import {Steppy} from 'vue3-steppy'
 import { useToast } from 'vue-toastification';
 
 const toast = useToast();
