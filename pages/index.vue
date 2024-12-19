@@ -18,6 +18,31 @@ useHead({
   ],
 });
 
+let countries = ref([]);
+
+async function countriesArr() {
+  await fetch('https://restcountries.com/v3.1/all', {
+    method: 'GET',
+  }).then(async (response) => {
+    if (!response.ok) {
+      throw new Error(`Ошибка при получении списка стран. Статус: ${res.status}`)
+    }
+
+    countries.value = await response.json();
+
+    // Если страны нет в объекте user, по дефолту стоит Казахстан
+    if (!user.addressInformation.country.cca3) {
+      changeUserValue('addressInformation','country', countries.value.find((item) => item.cca3 === 'KAZ'));
+    }
+  }).catch((error) => {
+    toast.error(error.message, {
+      timeout: 3000,
+    });
+  });
+}
+
+countriesArr();
+
 // Проверка и заполнение данных, если они есть в localStorage.
 const user = reactive({
   userPersonalInformation: window?.localStorage.getItem('userPersonalInformation') ?
@@ -124,6 +149,7 @@ function blockNonNumbers(event) {
       @change-value="changeUserValue"
       :user="user.addressInformation"
       :selected-country="user.addressInformation.country"
+      :countries="countries"
       :blockNonNumbers="blockNonNumbers"
     ></step-two>
     <step-three

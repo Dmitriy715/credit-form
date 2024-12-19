@@ -14,6 +14,10 @@ let props = defineProps({
     type: Object,
     required: true,
   },
+  countries: {
+    type: Array,
+    required: true,
+  },
   blockNonNumbers: {
     type: Function,
     required: true,
@@ -24,32 +28,6 @@ let props = defineProps({
 function selectCountry(code) {
   return props?.selectedCountry?.cca3 ? code === props.selectedCountry.cca3 : code === 'KAZ';
 }
-
-let countries = ref([]);
-
-async function countriesArr() {
-  await fetch('https://restcountries.com/v3.1/all', {
-    method: 'GET',
-  }).then(async (response) => {
-    if (!response.ok) {
-      throw new Error(`Ошибка при получении списка стран. Статус: ${res.status}`)
-    }
-
-    countries.value = await response.json();
-
-    // Если страны нет в объекте user, по дефолту стоит Казахстан
-    if (!props.user.country.cca3) {
-      changeValue('country', 'KAZ');
-    }
-  }).catch((error) => {
-    toast.error(error.message, {
-      timeout: 3000,
-    });
-  });
-}
-onMounted(() => {
-  countriesArr();
-})
 
 function nextStep() {
   if (validateForm()) {
@@ -63,7 +41,7 @@ function nextStep() {
 
 function changeValue(propertyName, event) {
   if (propertyName === 'country') {
-    emit('change-value', 'addressInformation', propertyName, countries.value.find((item) => item.cca3 === event));
+    emit('change-value', 'addressInformation', propertyName, props.countries.find((item) => item.cca3 === event));
   } else {
     emit('change-value', 'addressInformation', propertyName, event);
   }
@@ -124,7 +102,7 @@ let errors = reactive({
         @change="(event) => changeValue('country', event.target.value)"
       >
         <option
-          v-for="country of countries"
+          v-for="country of props.countries"
           :key="country.cca3"
           :value="country.cca3"
           :selected="selectCountry(country.cca3)"
